@@ -15,15 +15,15 @@ storage:
     - path: /home/core/.bashrc
       mode: 0755
       contents:
-        local: bashrc
+        local: bashrc.sh
       user:
         name: core
       group:
         name: core
-    - path: /setup/setup.sh
+    - path: /opt/bin/restore
       mode: 0755
       contents:
-        local: setup.sh
+        local: restore.sh
     - path: /opt/bin/run-containers
       mode: 0755
       contents:
@@ -182,20 +182,19 @@ systemd:
         [Install]
         WantedBy=multi-user.target
         
-    # --- SETUP  SCRIPT ---
-    - name: setup.service
+    # --- RESTORE SCRIPT ---
+    - name: restore.service
       enabled: true
       contents: |
         [Unit]
         Description=Custom Setup Scritps
-        ConditionPathExists=!/setup/setup_done
+        ConditionPathExists=!/data/.setup
         Before=docker.service, run-containers.service
         After=local-fs.target
 
         [Service]
         Type=oneshot
-        ExecStart=/setup/setup.sh
-        ExecStartPost=sudo touch /setup/setup_done
+        ExecStart=/opt/bin/restore
         RemainAfterExit=yes
         User=core
         Group=core
