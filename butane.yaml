@@ -28,6 +28,10 @@ storage:
       mode: 0755
       contents:
         local: run-containers.sh
+    - path: /opt/bin/backup
+      mode: 0755
+      contents:
+        local: backup.sh
     - path: /etc/smb-credentials
       mode: 0600
       contents:
@@ -227,3 +231,30 @@ systemd:
 
         [Install]
         WantedBy=multi-user.target
+    
+    # --- Run Backup ---
+    - name: backup.service
+      contents: |
+        [Unit]
+        Description=Snapshot and Rsync to NAS
+        After=nas-backups.mount data.mount
+        Requires=data.mount nas-backups.mount
+
+        [Service]
+        Type=oneshot
+        ExecStart=/opt/bin/backup
+        
+    - name: backup.timer
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Run Daily Backup at 2AM
+
+        [Timer]
+        # Runs at 2:00 AM every day
+        OnCalendar=*-*-* 02:00:00
+        Persistent=true
+
+        [Install]
+        WantedBy=timers.target
+        
