@@ -1,0 +1,8 @@
+variant: flatcar
+version: 1.0.0
+storage:
+  files:
+    - path: /setup.sh
+      contents:
+        local: setup.sh
+      mode: 0644
