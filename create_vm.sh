@@ -1,3 +1,5 @@
+#!/usr/bin/env sh
+
 export VM_ID=123
 
 set -e
@@ -30,3 +32,6 @@ qm set $VM_ID --ide2 local-lvm:cloudinit
 # copy over the ignition config and set the vm to it
 cp ./ignition.json /var/lib/vz/snippets/ignition
 qm set $VM_ID --cicustom "user=local:snippets/ignition"
+
+# boot the VM
+qm start $VM_ID

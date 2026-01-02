@@ -2,7 +2,24 @@ variant: flatcar
 version: 1.0.0
 storage:
   files:
-    - path: /setup.sh
+    - path: /setup/setup.sh
+      mode: 0755
       contents:
         local: setup.sh
-      mode: 0644
+systemd:
+  units:
+    - name: setup.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Custom Setup Scritps
+        ConditionPathExists=!/setup/setup_done
+
+        [Service]
+        Type=oneshot
+        ExecStart=/setup/setup.sh
+        ExecStartPost=/usr/bin/touch /setup/setup_done
+        RemainAfterExit=yes
+
+        [Install]
+        WantedBy=multi-user.target
