@@ -1,5 +1,10 @@
 variant: flatcar
 version: 1.0.0
+passwd:
+  users:
+    - name: core
+      ssh_authorized_keys:
+        - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIF1S1Gmg+f/Q8R77OPvM1Vg3/T09sNla3N8bJ27vkBh+ bernikr
 storage:
   files:
     - path: /etc/hostname
