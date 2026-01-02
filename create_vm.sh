@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-export VM_ID=123
+export VM_ID=101
 export DATA_SIZE=5
 export CACHE_SIZE=5
 
@@ -15,8 +15,8 @@ if ! test -f "flatcar_production_proxmoxve_image.img"; then
 fi
 
 # shutdown and remove previous vm
-qm shutdown $VM_ID
-qm destroy $VM_ID
+qm shutdown $VM_ID || true
+qm destroy $VM_ID || true
 
 # create the vm and import the image to it's disk
 qm create $VM_ID --name "flatcar" --cores 2 --memory 4096 --net0 "virtio,bridge=vmbr0" --ipconfig0 "ip=dhcp"

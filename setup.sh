@@ -2,4 +2,5 @@
 
 set -e
 
-touch /setup/test
+# restore /data backup
+cp -r /nas/backups/flatcar/data/* /data/

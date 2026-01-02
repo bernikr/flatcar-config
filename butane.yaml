@@ -12,14 +12,42 @@ storage:
       overwrite: true
       contents:
         inline: flatcar
+    - path: /home/core/.bashrc
+      mode: 0755
+      contents:
+        local: bashrc
+      user:
+        name: core
+      group:
+        name: core
     - path: /setup/setup.sh
       mode: 0755
       contents:
         local: setup.sh
+    - path: /opt/bin/run-containers
+      mode: 0755
+      contents:
+        local: run-containers.sh
     - path: /etc/smb-credentials
       mode: 0600
       contents:
         local: smb-credentials
+    - path: /etc/tmpfiles.d/data-permissions.conf
+      mode: 0644
+      contents:
+        inline: |
+          z /data 0775 core core - -
+          z /cache 0775 core core - -
+    - path: /opt/extensions/docker-compose/docker-compose-2.34.0-x86-64.raw
+      mode: 0644
+      contents:
+        source: https://extensions.flatcar.org/extensions/docker-compose-2.34.0-x86-64.raw
+    - path: /etc/sysupdate.docker-compose.d/docker-compose.conf
+      contents:
+        source: https://extensions.flatcar.org/extensions/docker-compose.conf
+    - path: /etc/sysupdate.d/noop.conf
+      contents:
+        source: https://extensions.flatcar.org/extensions/noop.conf
   filesystems:
     - device: /dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_data
       format: btrfs
@@ -29,6 +57,10 @@ storage:
       format: btrfs
       wipe_filesystem: true
       label: cache
+  links:
+    - target: /opt/extensions/docker-compose/docker-compose-2.34.0-x86-64.raw
+      path: /etc/extensions/docker-compose.raw
+      hard: false
 systemd:
   units:
     # --- LOCAL FS ---
@@ -74,7 +106,7 @@ systemd:
         What=//homecloud.lan/data
         Where=/nas/data
         Type=cifs
-        Options=credentials=/etc/smb-credentials,iocharset=utf8,vers=3.1.1,uid=1000,gid=1000,file_mode=0770,dir_mode=0777,_netdev,soft
+        Options=credentials=/etc/smb-credentials,iocharset=utf8,vers=3.1.1,uid=500,gid=500,file_mode=0770,dir_mode=0770,_netdev,soft
     
     - name: nas-data.automount
       enabled: true
@@ -99,7 +131,7 @@ systemd:
         What=//homecloud.lan/media
         Where=/nas/media
         Type=cifs
-        Options=credentials=/etc/smb-credentials,iocharset=utf8,vers=3.1.1,uid=1000,gid=1000,file_mode=0770,dir_mode=0777,_netdev,soft
+        Options=credentials=/etc/smb-credentials,iocharset=utf8,vers=3.1.1,uid=500,gid=500,file_mode=0770,dir_mode=0770,_netdev,soft
     
     - name: nas-media.automount
       enabled: true
@@ -124,7 +156,7 @@ systemd:
         What=//homecloud.lan/backups
         Where=/nas/backups
         Type=cifs
-        Options=credentials=/etc/smb-credentials,iocharset=utf8,vers=3.1.1,uid=1000,gid=1000,file_mode=0770,dir_mode=0777,_netdev,soft
+        Options=credentials=/etc/smb-credentials,iocharset=utf8,vers=3.1.1,uid=500,gid=500,file_mode=0770,dir_mode=0770,_netdev,soft
     
     - name: nas-backups.automount
       enabled: true
@@ -146,14 +178,16 @@ systemd:
         [Unit]
         Description=Custom Setup Scritps
         ConditionPathExists=!/setup/setup_done
-        Before=docker.service
+        Before=docker.service, run-containers.service
         After=local-fs.target
 
         [Service]
         Type=oneshot
         ExecStart=/setup/setup.sh
-        ExecStartPost=/usr/bin/touch /setup/setup_done
+        ExecStartPost=sudo touch /setup/setup_done
         RemainAfterExit=yes
+        User=core
+        Group=core
 
         [Install]
         WantedBy=multi-user.target
@@ -161,3 +195,35 @@ systemd:
     # --- DOCKER SERVICE ---
     - name: docker.service
       enabled: true
+    
+    - name: systemd-sysupdate.timer
+      enabled: true
+      
+    - name: systemd-sysupdate.service
+      dropins:
+        - name: docker-compose.conf
+          contents: |
+            [Service]
+            ExecStartPre=/usr/bin/sh -c "readlink --canonicalize /etc/extensions/docker-compose.raw > /tmp/docker-compose"
+            ExecStartPre=/usr/lib/systemd/systemd-sysupdate -C docker-compose update
+            ExecStartPost=/usr/bin/sh -c "readlink --canonicalize /etc/extensions/docker-compose.raw > /tmp/docker-compose-new"
+            ExecStartPost=/usr/bin/sh -c "if ! cmp --silent /tmp/docker-compose /tmp/docker-compose-new; then touch /run/reboot-required; fi"
+    
+    # --- Start Containers ---
+    - name: run-containers.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Run everything
+        After=docker.service
+        Requires=docker.service
+
+        [Service]
+        Type=oneshot
+        ExecStart=/opt/bin/run-containers
+        RemainAfterExit=yes
+        User=core
+        Group=core
+
+        [Install]
+        WantedBy=multi-user.target
