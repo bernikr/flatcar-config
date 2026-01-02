@@ -3,4 +3,4 @@
 set -e
 
 # restore /data backup
-cp -r /nas/backups/flatcar/data/* /data/
+rsync -az --info=progress2 /nas/backups/flatcar/data/ /data/ 2>&1

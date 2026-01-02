@@ -55,15 +55,22 @@ storage:
   filesystems:
     - device: /dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_data
       format: btrfs
-      wipe_filesystem: true
+      wipe_filesystem: false
       label: data
+      path: /data
     - device: /dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_cache
       format: btrfs
-      wipe_filesystem: true
+      wipe_filesystem: false
       label: cache
+      path: /cache
+  directories:
+    - path: /cache/docker
   links:
     - target: /opt/extensions/docker-compose/docker-compose-2.34.0-x86-64.raw
       path: /etc/extensions/docker-compose.raw
+      hard: false
+    - target: /cache/docker
+      path: /var/lib/docker
       hard: false
 systemd:
   units:

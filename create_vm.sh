@@ -1,8 +1,8 @@
 #!/usr/bin/env sh
 
 export VM_ID=101
-export DATA_SIZE=5
-export CACHE_SIZE=5
+export DATA_SIZE=64
+export CACHE_SIZE=128
 
 set -e
 
@@ -15,11 +15,15 @@ if ! test -f "flatcar_production_proxmoxve_image.img"; then
 fi
 
 # shutdown and remove previous vm
-qm shutdown $VM_ID || true
-qm destroy $VM_ID || true
+if qm list | grep $VM_ID; then
+  qm shutdown $VM_ID || true
+  lvrename pve vm-$VM_ID-disk-1 temp-1
+  lvrename pve vm-$VM_ID-disk-2 temp-2
+  qm destroy $VM_ID
+fi
 
 # create the vm and import the image to it's disk
-qm create $VM_ID --name "flatcar" --cores 2 --memory 4096 --net0 "virtio,bridge=vmbr0" --ipconfig0 "ip=dhcp"
+qm create $VM_ID --name "flatcar" --cores 8 --memory 30720 --net0 "virtio,bridge=vmbr0" --ipconfig0 "ip=dhcp"
 qm disk import $VM_ID flatcar_production_proxmoxve_image.img local-lvm
 
 # tell the vm to boot from the imported image
@@ -34,9 +38,22 @@ qm set $VM_ID --ide2 local-lvm:cloudinit
 cp ./ignition.json /var/lib/vz/snippets/ignition
 qm set $VM_ID --cicustom "user=local:snippets/ignition"
 
-# create the data and cache disks
-qm set $VM_ID --scsi1 local-lvm:$DATA_SIZE,ssd=1,discard=on,serial=data
-qm set $VM_ID --scsi2 local-lvm:$CACHE_SIZE,ssd=1,discard=on,serial=cache
+# create or restore the data and cache disks
+if lvs | grep temp-1; then
+  lvrename pve temp-1 vm-$VM_ID-disk-1
+  qm set $VM_ID --scsi1 local-lvm:vm-$VM_ID-disk-1,ssd=1,discard=on,serial=data
+else
+  qm set $VM_ID --scsi1 local-lvm:$DATA_SIZE,ssd=1,discard=on,serial=data
+fi
+
+
+if lvs | grep temp-2; then
+  lvrename pve temp-2 vm-$VM_ID-disk-2
+  qm set $VM_ID --scsi2 local-lvm:vm-$VM_ID-disk-2,ssd=1,discard=on,serial=cache
+else
+  qm set $VM_ID --scsi2 local-lvm:$CACHE_SIZE,ssd=1,discard=on,serial=cache
+fi
+
 
 # boot the VM
 qm start $VM_ID
