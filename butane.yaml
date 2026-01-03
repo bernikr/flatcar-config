@@ -52,6 +52,11 @@ storage:
     - path: /etc/sysupdate.d/noop.conf
       contents:
         source: https://extensions.flatcar.org/extensions/noop.conf
+    - path: /opt/bin/nano
+      mode: 0755
+      contents:
+        # Static binary from a reliable community source
+        source: https://github.com/andrew-d/static-binaries/raw/cd9bf1f36470b67851fa9218f9b17dd7e28be291/binaries/linux/x86_64/nano
   filesystems:
     - device: /dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_data
       format: btrfs
@@ -263,4 +268,3 @@ systemd:
 
         [Install]
         WantedBy=timers.target
-        
