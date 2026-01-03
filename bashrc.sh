@@ -9,6 +9,9 @@ alias rm='rm -ir'
 alias cp='cp -i'
 alias mv='mv -i'
 
+# fix for opening nano inside of tmux
+export TERM=xterm
+
 alias dc='docker compose'
 alias dcu='docker compose up -d --pull always --remove-orphans'
 alias dcb='docker compose --progress=plain build'
