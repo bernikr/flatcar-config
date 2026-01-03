@@ -16,6 +16,14 @@ fi
 # 1. Create snapshot directory if it doesn't exist
 mkdir -p "$SNAP_DIR"
 
+# 1.5. Clean up previous snapshots
+for dir in "$SNAP_DIR/*/"
+do
+  echo "cleaning up $dir"
+  btrfs subvolume delete $dir
+done
+
+
 echo "--- Backup Started: $(date) ---"
 
 # 2. Create a Read-Only Btrfs Snapshot
