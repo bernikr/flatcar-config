@@ -223,15 +223,34 @@ systemd:
             ExecStartPre=/usr/lib/systemd/systemd-sysupdate -C docker-compose update
             ExecStartPost=/usr/bin/sh -c "readlink --canonicalize /etc/extensions/docker-compose.raw > /tmp/docker-compose-new"
             ExecStartPost=/usr/bin/sh -c "if ! cmp --silent /tmp/docker-compose /tmp/docker-compose-new; then touch /run/reboot-required; fi"
-    
+
+    # --- Docker Networks ---
+    - name: docker-networks.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Create Global Docker Networks
+        After=docker.service
+        Requires=docker.service
+
+        [Service]
+        Type=oneshot
+        RemainAfterExit=yes
+
+        ExecStart=-/usr/bin/docker network create --driver bridge interconnect
+        ExecStart=-/usr/bin/docker network create --driver ipvlan --subnet=172.23.0.0/24 -o parent=eth0  lan
+
+        [Install]
+        WantedBy=multi-user.target
+
     # --- Start Containers ---
     - name: run-containers.service
       enabled: true
       contents: |
         [Unit]
         Description=Run everything
-        After=docker.service
-        Requires=docker.service
+        After=docker.service docker-networks.service
+        Requires=docker.service docker-networks.service
 
         [Service]
         Type=oneshot
