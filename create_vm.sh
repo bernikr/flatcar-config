@@ -1,8 +1,10 @@
 #!/usr/bin/env sh
 
 export VM_ID=101
-export DATA_SIZE=64
-export CACHE_SIZE=128
+export DATA_SIZE=64 # GB
+export CACHE_SIZE=128 # GB
+export MEMORY_SIZE=50000 # MB
+
 
 set -e
 
@@ -23,7 +25,7 @@ if qm list | grep $VM_ID; then
 fi
 
 # create the vm and import the image to it's disk
-qm create $VM_ID --name "flatcar" --cores 8 --memory 30720 --net0 "virtio,bridge=vmbr0,macaddr=BC:24:11:99:AB:38" --ipconfig0 "ip=dhcp"
+qm create $VM_ID --name "flatcar" --cores 8 --memory $MEMORY_SIZE --net0 "virtio,bridge=vmbr0,macaddr=BC:24:11:99:AB:38" --ipconfig0 "ip=dhcp"
 qm disk import $VM_ID flatcar_production_proxmoxve_image.img local-lvm
 
 # tell the vm to boot from the imported image
@@ -54,6 +56,8 @@ else
   qm set $VM_ID --scsi2 local-lvm:$CACHE_SIZE,ssd=1,discard=on,serial=cache
 fi
 
+# set the gpu passthrough
+qm set $VM_ID --hostpci0 0000:00:02.0
 
 # boot the VM
 qm start $VM_ID
