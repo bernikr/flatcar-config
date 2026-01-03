@@ -22,13 +22,17 @@ storage:
         name: core
     - path: /home/core/.bash_profile
       mode: 0755
+      user:
+        name: core
+      group:
+        name: core
       contents:
         inline: |
           if [[ -f ~/.bashrc ]] ; then
             . ~/.bashrc
           fi
           if [[ -z "$TMUX" ]]; then
-            tmux new-session -A -s default
+            tmux -u new-session -A -s default
           fi
     - path: /opt/bin/restore
       mode: 0755
