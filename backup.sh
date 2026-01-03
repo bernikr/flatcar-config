@@ -17,9 +17,8 @@ fi
 mkdir -p "$SNAP_DIR"
 
 # 1.5. Clean up previous snapshots
-for dir in "$SNAP_DIR/*/"
+for dir in $(find $SNAP_DIR -maxdepth 1 -mindepth 1 -type d)
 do
-  echo "cleaning up $dir"
   btrfs subvolume delete $dir
 done
 
