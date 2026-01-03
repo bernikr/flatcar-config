@@ -23,7 +23,7 @@ if qm list | grep $VM_ID; then
 fi
 
 # create the vm and import the image to it's disk
-qm create $VM_ID --name "flatcar" --cores 8 --memory 30720 --net0 "virtio,bridge=vmbr0" --ipconfig0 "ip=dhcp"
+qm create $VM_ID --name "flatcar" --cores 8 --memory 30720 --net0 "virtio,bridge=vmbr0,macaddr=BC:24:11:99:AB:38" --ipconfig0 "ip=dhcp"
 qm disk import $VM_ID flatcar_production_proxmoxve_image.img local-lvm
 
 # tell the vm to boot from the imported image
