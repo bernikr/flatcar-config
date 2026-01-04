@@ -59,5 +59,8 @@ fi
 # set the gpu passthrough
 qm set $VM_ID --hostpci0 0000:00:02.0
 
+# boot on proxmox startup
+qm set $VM_ID --onboot 1
+
 # boot the VM
 qm start $VM_ID
