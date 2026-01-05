@@ -256,7 +256,7 @@ systemd:
         Type=oneshot
         RemainAfterExit=yes
 
-        ExecStart=-/usr/bin/docker network create --driver bridge interconnect
+        ExecStart=-/usr/bin/docker network create --driver bridge --internal interconnect
         ExecStart=-/usr/bin/docker network create --driver ipvlan --subnet=172.23.0.0/24 -o parent=eth0  lan
 
         [Install]
