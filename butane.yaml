@@ -64,6 +64,15 @@ storage:
         name: core
       group:
         name: core
+    - path: /home/core/.tmux.conf
+      contents:
+        inline: |
+          set -g mouse-mode on
+      mode: 0600
+      user:
+        name: core
+      group:
+        name: core
     - path: /opt/extensions/docker-compose/docker-compose-2.34.0-x86-64.raw
       mode: 0644
       contents:
