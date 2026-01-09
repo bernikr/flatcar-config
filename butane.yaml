@@ -56,6 +56,14 @@ storage:
         inline: |
           z /data 0775 core core - -
           z /cache 0775 core core - -
+    - path: /home/core/.docker/config.json
+      contents:
+        local: docker-config.json
+      mode: 0600
+      user:
+        name: core
+      group:
+        name: core
     - path: /opt/extensions/docker-compose/docker-compose-2.34.0-x86-64.raw
       mode: 0644
       contents:
