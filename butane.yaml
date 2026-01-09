@@ -67,7 +67,7 @@ storage:
     - path: /home/core/.tmux.conf
       contents:
         inline: |
-          set -g mouse-mode on
+          set -g mouse on
       mode: 0600
       user:
         name: core
