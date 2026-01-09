@@ -323,3 +323,30 @@ systemd:
 
         [Install]
         WantedBy=timers.target
+
+    # --- Run Cleanup ---
+    - name: cleanup.service
+      contents: |
+        [Unit]
+        Description=Cleanup leftover docker volumes and trim filesystems
+        After=data.mount cache.mount docker.service
+        Requires=data.mount cache.mount docker.service
+
+        [Service]
+        Type=oneshot
+        ExecStart=/usr/bin/docker system prune -af --volumes
+        ExecStart=/usr/bin/fstrim -va
+
+    - name: cleanup.timer
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Run Daily Cleanup
+
+        [Timer]
+        # Runs at 23:00 AM every day
+        OnCalendar=*-*-* 23:00:00
+        Persistent=true
+
+        [Install]
+        WantedBy=timers.target
