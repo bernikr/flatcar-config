@@ -31,7 +31,7 @@ storage:
           if [[ -f ~/.bashrc ]] ; then
             . ~/.bashrc
           fi
-          if [[ -z "$TMUX" ]]; then
+          if [[ -z "$TMUX" ]] && ! tty | grep /dev/tty; then
             tmux -u new-session -A -s default
           fi
     - path: /opt/bin/restore
