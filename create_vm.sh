@@ -51,9 +51,9 @@ fi
 
 if lvs | grep temp-2; then
   lvrename pve temp-2 vm-$VM_ID-disk-2
-  qm set $VM_ID --scsi2 local-lvm:vm-$VM_ID-disk-2,ssd=1,discard=on,serial=cache
+  qm set $VM_ID --scsi2 local-lvm:vm-$VM_ID-disk-2,ssd=1,discard=on,serial=cache,backup=0
 else
-  qm set $VM_ID --scsi2 local-lvm:$CACHE_SIZE,ssd=1,discard=on,serial=cache
+  qm set $VM_ID --scsi2 local-lvm:$CACHE_SIZE,ssd=1,discard=on,serial=cache,backup=0
 fi
 
 # set the gpu passthrough
