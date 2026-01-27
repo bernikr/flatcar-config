@@ -73,6 +73,14 @@ storage:
         name: core
       group:
         name: core
+    - path: /etc/flatcar/update.conf
+      overwrite: true
+      contents:
+        inline: |
+          REBOOT_STRATEGY=reboot
+          LOCKSMITHD_REBOOT_WINDOW_START="Thu 04:00"
+          LOCKSMITHD_REBOOT_WINDOW_LENGTH=1h
+      mode: 0420
     - path: /opt/extensions/docker-compose/docker-compose-2.34.0-x86-64.raw
       mode: 0644
       contents:
