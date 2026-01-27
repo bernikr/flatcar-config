@@ -102,12 +102,12 @@ storage:
         source: https://github.com/mjakob-gh/build-static-tmux/releases/download/v3.6a/tmux.linux-amd64.gz
         compression: gzip
   filesystems:
-    - device: /dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_data
+    - device: /dev/disk/by-label/data
       format: btrfs
       wipe_filesystem: false
       label: data
       path: /data
-    - device: /dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_cache
+    - device: /dev/disk/by-label/cache
       format: btrfs
       wipe_filesystem: false
       label: cache
