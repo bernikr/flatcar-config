@@ -3,7 +3,7 @@
 export VM_ID=101
 export DATA_SIZE=64 # GB
 export CACHE_SIZE=256 # GB
-export MEMORY_SIZE=50000 # MB
+export MEMORY_SIZE=49152 # MB = 48 GB
 
 
 set -e
