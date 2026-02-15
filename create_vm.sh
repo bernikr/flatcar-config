@@ -62,6 +62,9 @@ qm set $VM_ID --hostpci0 0000:00:02.0
 # pass throgh rtl-sdr
 qm set $VM_ID -usb0 host=0bda:2838
 
+# set the instruction set to host for best performance (prevents migration to other hosts)
+qm set $VM_ID --cpu host
+
 # boot on proxmox startup
 qm set $VM_ID --onboot 1
 
