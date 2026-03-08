@@ -34,18 +34,10 @@ storage:
           if [[ -z "$TMUX" ]] && ! tty | grep /dev/tty; then
             tmux -u new-session -A -s default
           fi
-    - path: /opt/bin/restore
-      mode: 0755
-      contents:
-        local: restore.sh
     - path: /opt/bin/run-containers
       mode: 0755
       contents:
         local: run-containers.sh
-    - path: /opt/bin/backup
-      mode: 0755
-      contents:
-        local: backup.sh
     - path: /etc/smb-credentials
       mode: 0600
       contents:
@@ -103,12 +95,12 @@ storage:
         compression: gzip
   filesystems:
     - device: /dev/disk/by-label/data
-      format: btrfs
+      format: ext4
       wipe_filesystem: false
       label: data
       path: /data
     - device: /dev/disk/by-label/cache
-      format: btrfs
+      format: ext4
       wipe_filesystem: false
       label: cache
       path: /cache
@@ -134,7 +126,7 @@ systemd:
         [Mount]
         What=/dev/disk/by-label/data
         Where=/data
-        Type=btrfs
+        Type=ext4
         Options=compress=zstd,autodefrag,discard=async
         
         [Install]
@@ -150,7 +142,7 @@ systemd:
         [Mount]
         What=/dev/disk/by-label/cache
         Where=/cache
-        Type=btrfs
+        Type=ext4
         Options=compress=zstd,autodefrag,discard=async
         
         [Install]
@@ -203,51 +195,6 @@ systemd:
         Where=/nas/media
         TimeoutIdleSec=300
         
-        [Install]
-        WantedBy=multi-user.target
-
-    # --- BACKUPS SHARE ---
-    - name: nas-backups.mount
-      contents: |
-        [Unit]
-        Description=Mount /nas/backups
-        
-        [Mount]
-        What=//homecloud.lan/backups
-        Where=/nas/backups
-        Type=cifs
-        Options=credentials=/etc/smb-credentials,iocharset=utf8,vers=3.1.1,uid=500,gid=500,file_mode=0770,dir_mode=0770,_netdev,soft
-    
-    - name: nas-backups.automount
-      enabled: true
-      contents: |
-        [Unit]
-        Description=Automount /nas/backups
-        
-        [Automount]
-        Where=/nas/backups
-        TimeoutIdleSec=300
-        
-        [Install]
-        WantedBy=multi-user.target
-        
-    # --- RESTORE SCRIPT ---
-    - name: restore.service
-      enabled: true
-      contents: |
-        [Unit]
-        Description=Custom Setup Scritps
-        ConditionPathExists=!/data/.setup
-        Before=docker.service, run-containers.service
-        After=local-fs.target
-
-        [Service]
-        Type=oneshot
-        ExecStart=/opt/bin/restore
-        RemainAfterExit=yes
-        User=core
-        Group=core
-
         [Install]
         WantedBy=multi-user.target
     
@@ -305,32 +252,6 @@ systemd:
 
         [Install]
         WantedBy=multi-user.target
-    
-    # --- Run Backup ---
-    - name: backup.service
-      contents: |
-        [Unit]
-        Description=Snapshot and Rsync to NAS
-        After=nas-backups.mount data.mount
-        Requires=data.mount nas-backups.mount
-
-        [Service]
-        Type=oneshot
-        ExecStart=/opt/bin/backup
-        
-    - name: backup.timer
-      enabled: true
-      contents: |
-        [Unit]
-        Description=Run Daily Backup at 2AM
-
-        [Timer]
-        # Runs at 2:00 AM every day
-        OnCalendar=*-*-* 02:00:00
-        Persistent=true
-
-        [Install]
-        WantedBy=timers.target
 
     # --- Run Cleanup ---
     - name: cleanup.service

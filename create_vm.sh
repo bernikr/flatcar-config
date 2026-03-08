@@ -2,7 +2,7 @@
 
 export VM_ID=101
 export DATA_SIZE=64 # GB
-export CACHE_SIZE=256 # GB
+export CACHE_SIZE=128 # GB
 export MEMORY_SIZE=49152 # MB = 48 GB
 
 
@@ -51,9 +51,9 @@ fi
 
 if lvs | grep temp-2; then
   lvrename pve temp-2 vm-$VM_ID-disk-2
-  qm set $VM_ID --scsi2 local-lvm:vm-$VM_ID-disk-2,ssd=1,discard=on,serial=cache,backup=0
+  qm set $VM_ID --scsi2 local-lvm:vm-$VM_ID-disk-2,ssd=1,discard=on,serial=cache
 else
-  qm set $VM_ID --scsi2 local-lvm:$CACHE_SIZE,ssd=1,discard=on,serial=cache,backup=0
+  qm set $VM_ID --scsi2 local-lvm:$CACHE_SIZE,ssd=1,discard=on,serial=cache
 fi
 
 # set the gpu passthrough
