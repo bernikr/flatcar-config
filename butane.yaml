@@ -94,15 +94,15 @@ storage:
         source: https://github.com/mjakob-gh/build-static-tmux/releases/download/v3.6a/tmux.linux-amd64.gz
         compression: gzip
   filesystems:
-    - device: /dev/disk/by-label/data
+    - device: /dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_drive-scsi1
       format: ext4
       wipe_filesystem: false
-      label: data
+      with_mount_unit: true
       path: /data
-    - device: /dev/disk/by-label/cache
+    - device: /dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_drive-scsi2
       format: ext4
       wipe_filesystem: false
-      label: cache
+      with_mount_unit: true
       path: /cache
   directories:
     - path: /cache/docker
@@ -115,39 +115,6 @@ storage:
       hard: false
 systemd:
   units:
-    # --- LOCAL FS ---
-    - name: data.mount
-      enabled: true
-      contents: |
-        [Unit]
-        Description=Mount /data
-        Before=local-fs.target
-        
-        [Mount]
-        What=/dev/disk/by-label/data
-        Where=/data
-        Type=ext4
-        Options=compress=zstd,autodefrag,discard=async
-        
-        [Install]
-        WantedBy=local-fs.target
-    
-    - name: cache.mount
-      enabled: true
-      contents: |
-        [Unit]
-        Description=Mount /cache
-        Before=local-fs.target
-        
-        [Mount]
-        What=/dev/disk/by-label/cache
-        Where=/cache
-        Type=ext4
-        Options=compress=zstd,autodefrag,discard=async
-        
-        [Install]
-        WantedBy=local-fs.target
-        
     # --- DATA SHARE ---
     - name: nas-data.mount
       contents: |

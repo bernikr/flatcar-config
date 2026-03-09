@@ -41,20 +41,25 @@ cp ./ignition.json /var/lib/vz/snippets/ignition
 qm set $VM_ID --cicustom "user=local:snippets/ignition"
 
 # create or restore the data and cache disks
+
+# data drive
 if lvs | grep temp-1; then
   lvrename pve temp-1 vm-$VM_ID-disk-1
-  qm set $VM_ID --scsi1 local-lvm:vm-$VM_ID-disk-1,ssd=1,discard=on,serial=data
+  qm set $VM_ID --scsi1 local-lvm:vm-$VM_ID-disk-1,iothread=1,discard=on,cache=none,ssd=1
 else
-  qm set $VM_ID --scsi1 local-lvm:$DATA_SIZE,ssd=1,discard=on,serial=data
+  qm set $VM_ID --scsi1 local-lvm:$DATA_SIZE,iothread=1,discard=on,cache=none,ssd=1
 fi
 
-
+# cache drive
 if lvs | grep temp-2; then
   lvrename pve temp-2 vm-$VM_ID-disk-2
-  qm set $VM_ID --scsi2 local-lvm:vm-$VM_ID-disk-2,ssd=1,discard=on,serial=cache
+  qm set $VM_ID --scsi2 local-lvm:vm-$VM_ID-disk-2,iothread=1,discard=on,cache=none,ssd=1
 else
-  qm set $VM_ID --scsi2 local-lvm:$CACHE_SIZE,ssd=1,discard=on,serial=cache
+  qm set $VM_ID --scsi2 local-lvm:$CACHE_SIZE,iothread=1,discard=on,cache=none,ssd=1
 fi
+
+# set the scsi controller for best performance
+qm set $VM_ID --scsihw virtio-scsi-single
 
 # set the gpu passthrough
 qm set $VM_ID --hostpci0 0000:00:02.0
