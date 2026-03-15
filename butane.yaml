@@ -93,6 +93,12 @@ storage:
       contents:
         source: https://github.com/mjakob-gh/build-static-tmux/releases/download/v3.6a/tmux.linux-amd64.gz
         compression: gzip
+    - path: /etc/modules-load.d/nfs.conf
+      mode: 0644
+      contents:
+        inline: |
+          nfs
+          nfsd
   filesystems:
     - device: /dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_drive-scsi1
       format: ext4
