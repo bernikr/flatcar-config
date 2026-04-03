@@ -131,7 +131,7 @@ systemd:
         What=//homecloud.lan/data
         Where=/nas/data
         Type=cifs
-        Options=credentials=/etc/smb-credentials,iocharset=utf8,vers=3.1.1,uid=500,gid=500,file_mode=0770,dir_mode=0770,_netdev,soft
+        Options=credentials=/etc/smb-credentials,iocharset=utf8,vers=3.1.1,uid=500,gid=500,file_mode=0770,dir_mode=0770,_netdev,soft,noperm
     
     - name: nas-data.automount
       enabled: true
@@ -156,7 +156,7 @@ systemd:
         What=//homecloud.lan/media
         Where=/nas/media
         Type=cifs
-        Options=credentials=/etc/smb-credentials,iocharset=utf8,vers=3.1.1,uid=500,gid=500,file_mode=0770,dir_mode=0770,_netdev,soft
+        Options=credentials=/etc/smb-credentials,iocharset=utf8,vers=3.1.1,uid=500,gid=500,file_mode=0770,dir_mode=0770,_netdev,soft,noperm
     
     - name: nas-media.automount
       enabled: true
