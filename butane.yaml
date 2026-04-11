@@ -12,14 +12,6 @@ storage:
       overwrite: true
       contents:
         inline: flatcar
-    - path: /home/core/.bashrc
-      mode: 0755
-      contents:
-        local: bashrc.sh
-      user:
-        name: core
-      group:
-        name: core
     - path: /home/core/.bash_profile
       mode: 0755
       user:
@@ -73,6 +65,16 @@ storage:
           LOCKSMITHD_REBOOT_WINDOW_START="Thu 04:00"
           LOCKSMITHD_REBOOT_WINDOW_LENGTH=1h
       mode: 0420
+    - path: /home/core/setup-chezmoi.sh
+      mode: 0755
+      user:
+        name: core
+      group:
+        name: core
+      contents:
+        inline: |
+          #!/bin/bash
+          /usr/bin/sh -c "$(/usr/bin/curl -fsLS get.chezmoi.io)" -- init --apply bernikr
     - path: /opt/extensions/docker-compose/docker-compose-2.34.0-x86-64.raw
       mode: 0644
       contents:
@@ -93,12 +95,6 @@ storage:
       contents:
         source: https://github.com/mjakob-gh/build-static-tmux/releases/download/v3.6a/tmux.linux-amd64.gz
         compression: gzip
-    - path: /etc/modules-load.d/nfs.conf
-      mode: 0644
-      contents:
-        inline: |
-          nfs
-          nfsd
   filesystems:
     - device: /dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_drive-scsi1
       format: ext4
@@ -252,3 +248,25 @@ systemd:
 
         [Install]
         WantedBy=timers.target
+
+    # --- first boot commands ---
+    - name: chezmoi-first-boot.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Run chezmoi init on first boot
+        ConditionPathExists=!/home/core/.chezmoi_done
+        After=network-online.target
+        Wants=network-online.target
+
+        [Service]
+        Type=oneshot
+        User=core
+        Group=core
+        WorkingDirectory=/home/core
+        ExecStart=/home/core/setup-chezmoi.sh
+        ExecStartPost=/usr/bin/touch /home/core/.chezmoi_done
+        RemainAfterExit=yes
+
+        [Install]
+        WantedBy=multi-user.target
