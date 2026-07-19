@@ -48,15 +48,6 @@ storage:
         name: core
       group:
         name: core
-    - path: /home/core/.tmux.conf
-      contents:
-        inline: |
-          set -g mouse on
-      mode: 0600
-      user:
-        name: core
-      group:
-        name: core
     - path: /etc/flatcar/update.conf
       overwrite: true
       contents:
