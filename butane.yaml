@@ -62,6 +62,24 @@ storage:
         inline: |
           #!/bin/bash
           /usr/bin/sh -c "$(/usr/bin/curl -fsLS get.chezmoi.io)" -- init --apply bernikr
+    - path: /home/core/.config/chezmoi/chezmoi.toml
+      mode: 0600
+      user:
+        name: core
+      group:
+        name: core
+      contents:
+        inline: |
+          [data]
+              install_tools = true
+    - path: /home/core/.config/chezmoi/key.txt
+      mode: 0600
+      user:
+        name: core
+      group:
+        name: core
+      contents:
+        local: chezmoi_key.txt
     - path: /opt/extensions/docker-compose/docker-compose-2.34.0-x86-64.raw
       mode: 0644
       contents:
@@ -85,6 +103,24 @@ storage:
       path: /cache
   directories:
     - path: /cache/docker
+    - path: /home/core/.config
+      mode: 0755
+      user:
+        name: core
+      group:
+        name: core
+    - path: /home/core/.config/chezmoi
+      mode: 0700
+      user:
+        name: core
+      group:
+        name: core
+    - path: /home/core/.docker
+      mode: 0700
+      user:
+        name: core
+      group:
+        name: core
   links:
     - target: /opt/extensions/docker-compose/docker-compose-2.34.0-x86-64.raw
       path: /etc/extensions/docker-compose.raw
@@ -206,3 +242,25 @@ systemd:
 
         [Install]
         WantedBy=timers.target
+
+    # --- first boot commands ---
+    - name: chezmoi-first-boot.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Run chezmoi init on first boot
+        ConditionPathExists=!/home/core/.chezmoi_done
+        After=network-online.target
+        Wants=network-online.target
+
+        [Service]
+        Type=oneshot
+        User=core
+        Group=core
+        WorkingDirectory=/home/core
+        ExecStart=/home/core/setup-chezmoi.sh
+        ExecStartPost=/usr/bin/touch /home/core/.chezmoi_done
+        RemainAfterExit=yes
+
+        [Install]
+        WantedBy=multi-user.target
