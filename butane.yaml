@@ -26,10 +26,6 @@ storage:
           if [[ -z "$TMUX" ]] && ! tty | grep /dev/tty; then
             tmux -u new-session -A -s default
           fi
-    - path: /opt/bin/run-containers
-      mode: 0755
-      contents:
-        local: run-containers.sh
     - path: /etc/smb-credentials
       mode: 0600
       contents:
@@ -194,25 +190,6 @@ systemd:
         [Install]
         WantedBy=multi-user.target
 
-    # --- Start Containers ---
-    - name: run-containers.service
-      enabled: true
-      contents: |
-        [Unit]
-        Description=Run everything
-        After=docker.service docker-networks.service
-        Requires=docker.service docker-networks.service
-
-        [Service]
-        Type=oneshot
-        ExecStart=/opt/bin/run-containers
-        RemainAfterExit=yes
-        User=core
-        Group=core
-
-        [Install]
-        WantedBy=multi-user.target
-
     # --- Run Cleanup ---
     - name: cleanup.service
       contents: |
@@ -239,25 +216,3 @@ systemd:
 
         [Install]
         WantedBy=timers.target
-
-    # --- first boot commands ---
-    - name: chezmoi-first-boot.service
-      enabled: true
-      contents: |
-        [Unit]
-        Description=Run chezmoi init on first boot
-        ConditionPathExists=!/home/core/.chezmoi_done
-        After=network-online.target
-        Wants=network-online.target
-
-        [Service]
-        Type=oneshot
-        User=core
-        Group=core
-        WorkingDirectory=/home/core
-        ExecStart=/home/core/setup-chezmoi.sh
-        ExecStartPost=/usr/bin/touch /home/core/.chezmoi_done
-        RemainAfterExit=yes
-
-        [Install]
-        WantedBy=multi-user.target
