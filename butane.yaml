@@ -264,3 +264,9 @@ systemd:
 
         [Install]
         WantedBy=multi-user.target
+
+    # --- disable unused sysupdate-reboot service that just throws errors ---
+    - name: systemd-sysupdate-reboot.timer
+      mask: true
+    - name: systemd-sysupdate-reboot.service
+      mask: true
