@@ -90,6 +90,12 @@ storage:
     - path: /etc/sysupdate.d/noop.conf
       contents:
         source: https://extensions.flatcar.org/extensions/noop.conf
+    - path: /etc/systemd/network/20-eth0.network.d/10-ipv6-token.conf
+      mode: 0644
+      contents:
+        inline: |
+          [Network]
+          IPv6Token=::9
   filesystems:
     - device: /dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_drive-scsi1
       format: ext4
