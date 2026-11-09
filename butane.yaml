@@ -280,3 +280,11 @@ systemd:
       mask: true
     - name: systemd-sysupdate-reboot.service
       mask: true
+
+    # --- no serial console on this QEMU VM ---
+    # VM 101 has no serial device attached, but Flatcar's kernel cmdline carries
+    # console=ttyS0, so systemd-getty-generator instantiates this unit at every
+    # boot. agetty then fails with "/dev/ttyS0: not a tty", exits 1 and systemd
+    # restarts it every ~10 s forever. tty1 (getty@tty1) and SSH are unaffected.
+    - name: serial-getty@ttyS0.service
+      mask: true
